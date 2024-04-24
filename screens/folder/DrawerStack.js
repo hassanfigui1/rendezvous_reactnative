@@ -87,7 +87,7 @@ const DrawerStack = createDrawerNavigator();
 export function DrawerScreenStack() {
   return (
     <DrawerStack.Navigator
-      initialRouteName="Home"
+      initialRouteName="RendezVousScreen"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
       <DrawerStack.Screen name="Home" component={HomeScreen} />

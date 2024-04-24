@@ -1,33 +1,93 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import { StyleSheet } from "react-native";
-import { Modal } from "react-native";
+import { SafeAreaView, Button } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { Image } from "react-native";
+import Example from "../modal/DatePickerModal";
+import DatePicker from "react-native-date-picker";
+import { getFormatedDate, getToday } from "react-native-modern-datepicker";
+
+const dateIcon = require("../assets/datePicker1.png");
 
 export default function RendezVousScreen() {
   const [centreData, setCentreData] = useState([]);
   const [creneauData, setCreneauData] = useState([]);
+  const [selectedCentre, setSelectedCentre] = useState(null); // Track selected centre
+  const [selectedCreneau, setSelectedCreneau] = useState(null); // Track selected creneau
   const [open, setOpen] = useState(false);
+  const [date, setDate] = useState("12/12/2024"); // Corrected date format
+
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
+
+  const showDatePicker = () => {
+    setDatePickerVisible(true);
+  };
+
+  const hideDatePicker = () => {
+    setDatePickerVisible(false);
+  };
+
+  const handleConfirm = (date) => {
+    setSelectedDate(date);
+    hideDatePicker();
+  };
+
+  const today = new Date();
+  const startDate = getFormatedDate(
+    today.setDate(today.getDate() + 1),
+    "YYYY/MM/DD"
+  );
+
+  const handleChange = (propDate) => {
+    setDate(propDate);
+  };
+
+  const fetchCreneausForCentre = (centreId) => {
+    // Fetch data from API for all creneaus
+    fetch(`https://a8f2-105-66-133-228.ngrok-free.app/api/creneaus`)
+      .then((response) => response.json())
+      .then((creneauData) => {
+        // Filter the data based on centreId
+        const filteredCreneaus = creneauData._embedded.creneaus.filter(
+          (creneau) => creneau.ressourceCentre.resourceId === centreId
+        );
+        setCreneauData(filteredCreneaus);
+      })
+      .catch((error) => console.error("Error fetching creneau data:", error));
+  };
 
   useEffect(() => {
     // Fetch data from API for centres
-    fetch("http://localhost:8080/api/centres?page=0&size=20")
+    fetch(
+      "https://a8f2-105-66-133-228.ngrok-free.app/api/centres?page=0&size=20"
+    )
       .then((response) => response.json())
       .then((centreData) => {
         setCentreData(centreData._embedded.centres);
+        // Select the first centre by default
+        if (centreData._embedded.centres.length > 0) {
+          setSelectedCentre(centreData._embedded.centres[0]);
+          fetchCreneausForCentre(centreData._embedded.centres[0].resourceId);
+        }
       })
       .catch((error) => console.error("Error fetching centre data:", error));
-
-    // Fetch data from API for creneaus
-    fetch("http://localhost:8080/api/creneaus?page=0&size=20")
-      .then((response) => response.json())
-      .then((creneauData) => {
-        setCreneauData(creneauData._embedded.creneaus);
-      })
-      .catch((error) => console.error("Error fetching creneau data:", error));
   }, []);
 
   const handleOnPress = () => {
     setOpen(!open);
+    showDatePicker();
+  };
+
+  const handleCentrePress = (centreId) => {
+    const selectedCentre = centreData.find(
+      (centre) => centre.resourceId === centreId
+    );
+    setSelectedCentre(selectedCentre); // Mettre à jour le centre sélectionné avec l'objet de centre complet
+
+    // Fetch creneaus for the selected centre
+    fetchCreneausForCentre(centreId);
   };
 
   return (
@@ -40,9 +100,6 @@ export default function RendezVousScreen() {
         keyExtractor={(item, idx) => item.resourceId + idx}
         showsVerticalScrollIndicator={false}
         renderItem={({ item }) => {
-          const associatedCentre = centreData.find(
-            (centre) => centre.resourceId === item.ressourceCentre.resourceId
-          );
           return (
             <TouchableOpacity
               style={{
@@ -50,11 +107,16 @@ export default function RendezVousScreen() {
                 justifyContent: "center",
                 alignItems: "center",
                 flexDirection: "row",
-                backgroundColor: "#F1F1F1",
+                backgroundColor:
+                  selectedCreneau &&
+                  selectedCreneau.resourceId === item.resourceId
+                    ? "#CCFFFF"
+                    : "white",
                 flex: 1,
-                height: 200,
+                height: 40,
                 borderRadius: 20,
               }}
+              onPress={() => setSelectedCreneau(item)} // Handle creneau press
             >
               <Text style={{ color: "black" }}>
                 {item.heureDebut} - {item.heureFin}
@@ -62,7 +124,7 @@ export default function RendezVousScreen() {
             </TouchableOpacity>
           );
         }}
-        ListHeaderComponentStyle={{ marginVertical: 10 }}
+        ListHeaderComponentStyle={{ marginVertical: 0 }}
         ListHeaderComponent={() => (
           <View>
             <View
@@ -70,19 +132,16 @@ export default function RendezVousScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={{ gap: 10, paddingHorizontal: 12 }}
             >
-              <Text>Hello world !</Text>
-              <TouchableOpacity onPress={handleOnPress}>
-                <Text>Open</Text>
-              </TouchableOpacity>
-              <Modal animationType="slide" transparent={true} visible={open}>
-                <View style={styles.centeredView}>
-                  <View style={styles.modalView}>
-                    <TouchableOpacity onPress={handleOnPress}>
-                        <Text>Close</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </Modal>
+              {datePickerVisible && (
+                <DateTimePickerModal
+                  isVisible={true} // Always visible when datePickerVisible is true
+                  mode="date"
+                  date={selectedDate}
+                  minimumDate={new Date()}
+                  onConfirm={handleConfirm}
+                  onCancel={hideDatePicker}
+                />
+              )}
             </View>
             <FlatList
               horizontal={true}
@@ -100,14 +159,26 @@ export default function RendezVousScreen() {
                     flexDirection: "row",
                     width: 140,
                     height: 65,
-                    backgroundColor: "rgb(229, 232, 234)",
-                    // borderRadius: 20,
+                    backgroundColor:
+                      selectedCentre &&
+                      selectedCentre.resourceId === item.resourceId
+                        ? "#CCFFFF"
+                        : "white", // Apply different background color for selected centre
+                    borderRadius: 20,
                   }}
+                  onPress={() => handleCentrePress(item.resourceId)} // Handle centre press
                 >
                   <Text>{item.nom}</Text>
                 </TouchableOpacity>
               )}
             />
+            {selectedCentre && ( // Display selected centre information if selectedCentre exists
+              <View style={{ paddingHorizontal: 12, marginTop: 15 }}>
+                <Text style={{ fontWeight: "bold" }}>Selected Centre:</Text>
+                <Text>ID: {selectedCentre.resourceId}</Text>
+                <Text>Name: {selectedCentre.nom}</Text>
+              </View>
+            )}
             <View
               style={{
                 display: "flex",
@@ -118,8 +189,10 @@ export default function RendezVousScreen() {
                 marginTop: 15,
               }}
             >
-              <Text style={{ fontWeight: "300" }}> Popular </Text>
-              <Text style={{ color: "BLUE" }}>See All</Text>
+              <TouchableOpacity onPress={handleOnPress}>
+                <Image source={dateIcon} style={{ width: 24, height: 24 }} />
+              </TouchableOpacity>
+              <Text style={{ color: "red" }}>See All</Text>
             </View>
           </View>
         )}
@@ -131,7 +204,7 @@ export default function RendezVousScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "green",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -145,7 +218,7 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: "white",
     borderRadius: 20,
-    width: '90%', // Corrected width value
+    width: "90%", // Corrected width value
     padding: 35,
     alignItems: "center",
     shadowColor: "#000",
