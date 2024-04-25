@@ -13,10 +13,10 @@ const dateIcon = require("../assets/datePicker1.png");
 export default function RendezVousScreen() {
   const [centreData, setCentreData] = useState([]);
   const [creneauData, setCreneauData] = useState([]);
-  const [selectedCentre, setSelectedCentre] = useState(null); // Track selected centre
-  const [selectedCreneau, setSelectedCreneau] = useState(null); // Track selected creneau
+  const [selectedCentre, setSelectedCentre] = useState(null); 
+  const [selectedCreneau, setSelectedCreneau] = useState(null); 
   const [open, setOpen] = useState(false);
-  const [date, setDate] = useState("12/12/2024"); // Corrected date format
+  const [date, setDate] = useState("01/01/2001"); 
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [datePickerVisible, setDatePickerVisible] = useState(false);
@@ -29,11 +29,6 @@ export default function RendezVousScreen() {
     setDatePickerVisible(false);
   };
 
-  const handleConfirm = (date) => {
-    setSelectedDate(date);
-    hideDatePicker();
-  };
-
   const today = new Date();
   const startDate = getFormatedDate(
     today.setDate(today.getDate() + 1),
@@ -44,29 +39,46 @@ export default function RendezVousScreen() {
     setDate(propDate);
   };
 
-  const fetchCreneausForCentre = (centreId) => {
-    // Fetch data from API for all creneaus
-    fetch(`https://a8f2-105-66-133-228.ngrok-free.app/api/creneaus`)
-      .then((response) => response.json())
-      .then((creneauData) => {
-        // Filter the data based on centreId
-        const filteredCreneaus = creneauData._embedded.creneaus.filter(
-          (creneau) => creneau.ressourceCentre.resourceId === centreId
+  const handleConfirm = (date) => {
+    // setSelectedDate(date);
+    hideDatePicker();
+    const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
+      .toString()
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+    // alert(formattedDate);
+  
+    fetchCreneausForCentre(selectedCentre.resourceId, formattedDate);
+  };
+
+  const fetchCreneausForCentre = (centreId, formattedDate) => {
+      fetch(`https://a8f2-105-66-133-228.ngrok-free.app/api/creneaus`)
+        .then((response) => response.json())
+        .then((creneauData) => {
+          const filteredCreneaus = creneauData._embedded.creneaus.filter(
+            (creneau) =>
+              creneau.ressourceCentre.resourceId == centreId &&
+              creneau.date === formattedDate
+          );
+
+          filteredCreneaus.map((x) => {
+            console.log("fdf: ", x.date === formattedDate, x.date);
+          });
+
+          setCreneauData(filteredCreneaus);
+        })
+        .catch((error) =>
+          console.error("Error fetching creneau data for centre:", error)
         );
-        setCreneauData(filteredCreneaus);
-      })
-      .catch((error) => console.error("Error fetching creneau data:", error));
+    
   };
 
   useEffect(() => {
-    // Fetch data from API for centres
     fetch(
       "https://a8f2-105-66-133-228.ngrok-free.app/api/centres?page=0&size=20"
     )
       .then((response) => response.json())
       .then((centreData) => {
         setCentreData(centreData._embedded.centres);
-        // Select the first centre by default
         if (centreData._embedded.centres.length > 0) {
           setSelectedCentre(centreData._embedded.centres[0]);
           fetchCreneausForCentre(centreData._embedded.centres[0].resourceId);
@@ -84,9 +96,8 @@ export default function RendezVousScreen() {
     const selectedCentre = centreData.find(
       (centre) => centre.resourceId === centreId
     );
-    setSelectedCentre(selectedCentre); // Mettre à jour le centre sélectionné avec l'objet de centre complet
+    setSelectedCentre(selectedCentre); 
 
-    // Fetch creneaus for the selected centre
     fetchCreneausForCentre(centreId);
   };
 
@@ -172,13 +183,6 @@ export default function RendezVousScreen() {
                 </TouchableOpacity>
               )}
             />
-            {selectedCentre && ( // Display selected centre information if selectedCentre exists
-              <View style={{ paddingHorizontal: 12, marginTop: 15 }}>
-                <Text style={{ fontWeight: "bold" }}>Selected Centre:</Text>
-                <Text>ID: {selectedCentre.resourceId}</Text>
-                <Text>Name: {selectedCentre.nom}</Text>
-              </View>
-            )}
             <View
               style={{
                 display: "flex",
@@ -186,7 +190,7 @@ export default function RendezVousScreen() {
                 alignItems: "center",
                 flexDirection: "row",
                 paddingHorizontal: 12,
-                marginTop: 15,
+                marginTop: 2,
               }}
             >
               <TouchableOpacity onPress={handleOnPress}>
@@ -194,6 +198,73 @@ export default function RendezVousScreen() {
               </TouchableOpacity>
               <Text style={{ color: "red" }}>See All</Text>
             </View>
+
+            <View style={stylesTable.container}>
+              {selectedCentre && selectedCreneau && selectedDate && (
+                <View style={{ paddingHorizontal: 12, marginTop: 15 }}>
+                  <Text style={{ fontWeight: "bold" }}>Rendez Vous:</Text>
+                  <View style={stylesTable.tableRow}>
+                    <View style={stylesTable.tableColumn}>
+                      <Text style={stylesTable.tableTitle}>ID:</Text>
+                      <Text style={stylesTable.tableValue}>
+                        {selectedCentre.resourceId}
+                      </Text>
+                    </View>
+                    <View style={stylesTable.tableColumn}>
+                      <Text style={stylesTable.tableTitle}>Name:</Text>
+                      <Text style={stylesTable.tableValue}>
+                        {selectedCentre.nom}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={stylesTable.tableRow}>
+                    <View style={stylesTable.tableColumn}>
+                      <Text style={stylesTable.tableTitle}>Address:</Text>
+                      <Text style={stylesTable.tableValue}>
+                        {selectedCentre.adresse}
+                      </Text>
+                    </View>
+                    <View style={stylesTable.tableColumn}>
+                      <Text style={stylesTable.tableTitle}>
+                        Start/end Time:
+                      </Text>
+                      <Text style={stylesTable.tableValue}>
+                        {selectedCreneau.heureDebut} -{" "}
+                        {selectedCreneau.heureFin}
+                      </Text>
+                    </View>
+                  </View>
+                  <View style={stylesTable?.tableRow}>
+                    <View style={stylesTable?.tableColumn}>
+                      <Text style={stylesTable?.tableTitle}>Date:</Text>
+                      <Text style={stylesTable?.tableValue}>
+                        {selectedDate ? selectedDate.toDateString() :''  }
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              )}
+            </View>
+
+            {selectedCentre &&
+              selectedCreneau &&
+              selectedDate && ( // Display submit button if all selections are made
+                <TouchableOpacity
+                  onPress={() => console.log("Submit button pressed")} // Add your submit function here
+                  style={{
+                    backgroundColor: "#99CCCC",
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    borderRadius: 10,
+                    alignSelf: "center",
+                    marginTop: 15,
+                  }}
+                >
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                    Submit
+                  </Text>
+                </TouchableOpacity>
+              )}
           </View>
         )}
       />
@@ -230,4 +301,23 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
   },
+});
+
+const stylesTable = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    margin: 8,
+  },
+  tableRow: {
+    flexDirection: "row",
+    marginTop: 5,
+  },
+  tableColumn: {
+    flex: 1,
+  },
+  tableTitle: {
+    fontWeight: "bold",
+  },
+  tableValue: {},
 });
