@@ -10,7 +10,7 @@ import WelcomeNavigator from "./navigation/WelcomeNavigator";
 import TokenDisplay from "./screens/TokenDisplay";
 const Stack = createStackNavigator();
 export default function App() {
-  const [auth, setAuth] = useState(true);
+  const [auth, setAuth] = useState(false);
   const [loading, setLoading] = useState(true);
   return (
     <Provider store={store}>

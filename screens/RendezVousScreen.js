@@ -1,25 +1,22 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, TouchableOpacity, Image } from "react-native";
 import { StyleSheet } from "react-native";
-import { SafeAreaView, Button } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Image } from "react-native";
-import Example from "../modal/DatePickerModal";
-import DatePicker from "react-native-date-picker";
-import { getFormatedDate, getToday } from "react-native-modern-datepicker";
-
+import { getFormatedDate } from "react-native-modern-datepicker";
+import { useNavigation, useRoute } from "@react-navigation/native";
 const dateIcon = require("../assets/datePicker1.png");
 
 export default function RendezVousScreen() {
+  const route = useRoute(); 
+
+  const navigation = useNavigation();
   const [centreData, setCentreData] = useState([]);
   const [creneauData, setCreneauData] = useState([]);
-  const [selectedCentre, setSelectedCentre] = useState(null); 
-  const [selectedCreneau, setSelectedCreneau] = useState(null); 
-  const [open, setOpen] = useState(false);
-  const [date, setDate] = useState("01/01/2001"); 
-
+  const [selectedCentre, setSelectedCentre] = useState(null);
+  const [selectedCreneau, setSelectedCreneau] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const selectedCentreId = route.params.selectedCentreId;
 
   const showDatePicker = () => {
     setDatePickerVisible(true);
@@ -29,6 +26,30 @@ export default function RendezVousScreen() {
     setDatePickerVisible(false);
   };
 
+  useEffect(() => {
+  
+    // Fetch centres data
+    fetch("https://a8f2-105-66-133-228.ngrok-free.app/api/centres?page=0&size=20")
+      .then((response) => response.json())
+      .then((centreData) => {
+        if (centreData._embedded && centreData._embedded.centres.length > 0) {
+          setCentreData(centreData._embedded.centres);
+          
+          // Select the center based on selectedCentreId
+          const selectedCentre = centreData._embedded.centres.find(
+            (centre) => centre.resourceId === selectedCentreId
+          );
+          setSelectedCentre(selectedCentre);
+  
+          // Fetch creneaus for selected centre
+          fetchCreneausForCentre(selectedCentreId);
+        } else {
+          console.error("No centres found in the response.");
+        }
+      })
+      .catch((error) => console.error("Error fetching centre data:", error));
+  }, [selectedCentreId]);
+  
   const today = new Date();
   const startDate = getFormatedDate(
     today.setDate(today.getDate() + 1),
@@ -40,55 +61,30 @@ export default function RendezVousScreen() {
   };
 
   const handleConfirm = (date) => {
-    // setSelectedDate(date);
     hideDatePicker();
     const formattedDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
       .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
-    // alert(formattedDate);
-  
     fetchCreneausForCentre(selectedCentre.resourceId, formattedDate);
   };
 
   const fetchCreneausForCentre = (centreId, formattedDate) => {
-      fetch(`https://a8f2-105-66-133-228.ngrok-free.app/api/creneaus`)
-        .then((response) => response.json())
-        .then((creneauData) => {
-          const filteredCreneaus = creneauData._embedded.creneaus.filter(
-            (creneau) =>
-              creneau.ressourceCentre.resourceId == centreId &&
-              creneau.date === formattedDate
-          );
-
-          filteredCreneaus.map((x) => {
-            console.log("fdf: ", x.date === formattedDate, x.date);
-          });
-
-          setCreneauData(filteredCreneaus);
-        })
-        .catch((error) =>
-          console.error("Error fetching creneau data for centre:", error)
+    fetch(`https://a8f2-105-66-133-228.ngrok-free.app/api/creneaus`)
+      .then((response) => response.json())
+      .then((creneauData) => {
+        const filteredCreneaus = creneauData._embedded.creneaus.filter(
+          (creneau) =>
+            creneau.ressourceCentre.resourceId == centreId &&
+            creneau.date === formattedDate
         );
-    
+        setCreneauData(filteredCreneaus);
+      })
+      .catch((error) =>
+        console.error("Error fetching creneau data for centre:", error)
+      );
   };
 
-  useEffect(() => {
-    fetch(
-      "https://a8f2-105-66-133-228.ngrok-free.app/api/centres?page=0&size=20"
-    )
-      .then((response) => response.json())
-      .then((centreData) => {
-        setCentreData(centreData._embedded.centres);
-        if (centreData._embedded.centres.length > 0) {
-          setSelectedCentre(centreData._embedded.centres[0]);
-          fetchCreneausForCentre(centreData._embedded.centres[0].resourceId);
-        }
-      })
-      .catch((error) => console.error("Error fetching centre data:", error));
-  }, []);
-
   const handleOnPress = () => {
-    setOpen(!open);
     showDatePicker();
   };
 
@@ -96,9 +92,13 @@ export default function RendezVousScreen() {
     const selectedCentre = centreData.find(
       (centre) => centre.resourceId === centreId
     );
-    setSelectedCentre(selectedCentre); 
+    setSelectedCentre(selectedCentre);
 
     fetchCreneausForCentre(centreId);
+  };
+
+  const navigateToHome = () => {
+    navigation.navigate("HomeScreen");
   };
 
   return (
@@ -173,7 +173,7 @@ export default function RendezVousScreen() {
                     backgroundColor:
                       selectedCentre &&
                       selectedCentre.resourceId === item.resourceId
-                        ? "#CCFFFF"
+                        ? "red"
                         : "white", // Apply different background color for selected centre
                     borderRadius: 20,
                   }}
@@ -196,7 +196,9 @@ export default function RendezVousScreen() {
               <TouchableOpacity onPress={handleOnPress}>
                 <Image source={dateIcon} style={{ width: 24, height: 24 }} />
               </TouchableOpacity>
-              <Text style={{ color: "red" }}>See All</Text>
+              <TouchableOpacity onPress={navigateToHome}>
+                <Text style={{ color: "red" }}>See All</Text>
+              </TouchableOpacity>
             </View>
 
             <View style={stylesTable.container}>
@@ -238,7 +240,7 @@ export default function RendezVousScreen() {
                     <View style={stylesTable?.tableColumn}>
                       <Text style={stylesTable?.tableTitle}>Date:</Text>
                       <Text style={stylesTable?.tableValue}>
-                        {selectedDate ? selectedDate.toDateString() :''  }
+                        {selectedDate ? selectedDate.toDateString() : ""}
                       </Text>
                     </View>
                   </View>
@@ -271,37 +273,6 @@ export default function RendezVousScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "green",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  centeredView: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 22,
-  },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    width: "90%", // Corrected width value
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-});
 
 const stylesTable = StyleSheet.create({
   container: {

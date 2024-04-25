@@ -16,6 +16,8 @@ import { StatusBar } from "expo-status-bar";
 import { ProfileScreen } from "../ProfileScreen";
 import Login from "../Login";
 import RendezVousScreen from "../RendezVousScreen";
+import HomeScreen from "../HomeScreen";
+
 
 function MyModal({ isVisible, onClick }) {
   return (
@@ -33,32 +35,31 @@ function MyModal({ isVisible, onClick }) {
   );
 }
 
-function HomeScreen({ navigation }) {
-  const [showModal, setShowModal] = React.useState(false);
+// function HomeScreen({ navigation }) {
+//   const [showModal, setShowModal] = React.useState(false);
 
-  React.useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <Button title="ADD" onPress={() => setShowModal(true)}></Button>
-      ),
-    });
-  }, [navigation]);
+//   React.useLayoutEffect(() => {
+//     navigation.setOptions({
+//       headerRight: () => (
+//         <Button title="ADD" onPress={() => setShowModal(true)}></Button>
+//       ),
+//     });
+//   }, [navigation]);
 
-  return (
-    <View style={styles.container}>
-      {/* MODAL */}
-      <MyModal isVisible={showModal} onClick={() => setShowModal(false)} />
-      {/* PAGE CONTENT */}
-      <Text>Open up App.tsx to start working on your app!</Text>
-      <StatusBar style="auto" />
-      <Button
-        title="next page"
-        onPress={() => navigation.navigate("Detail")}
-      ></Button>
-    </View>
-  );
-}
-
+//   return (
+//     <View style={styles.container}>
+//       {/* MODAL */}
+//       <MyModal isVisible={showModal} onClick={() => setShowModal(false)} />
+//       {/* PAGE CONTENT */}
+//       <Text>Open up App.tsx to start working on your app!</Text>
+//       <StatusBar style="auto" />
+//       <Button
+//         title="next page"
+//         onPress={() => navigation.navigate("Detail")}
+//       ></Button>
+//     </View>
+//   );
+// }
 
 function CustomDrawerContent(props) {
   return (
@@ -87,14 +88,18 @@ const DrawerStack = createDrawerNavigator();
 export function DrawerScreenStack() {
   return (
     <DrawerStack.Navigator
-      initialRouteName="RendezVousScreen"
+      initialRouteName="HomeScreen"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <DrawerStack.Screen name="Home" component={HomeScreen} />
+      <DrawerStack.Screen name="HomeScreen" component={HomeScreen} />
+
+      {/* <DrawerStack.Screen name="Home" component={HomeScreen} /> */}
       <DrawerStack.Screen name="Profile" component={ProfileScreen} />
       <DrawerStack.Screen name="Login" component={Login} />
-      <DrawerStack.Screen name="RendezVousScreen" component={RendezVousScreen} />
-
+      <DrawerStack.Screen
+        name="RendezVousScreen"
+        component={RendezVousScreen}
+      />
     </DrawerStack.Navigator>
   );
 }

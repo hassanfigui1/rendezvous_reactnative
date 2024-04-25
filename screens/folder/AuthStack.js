@@ -2,18 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import {View, Text, Button, StyleSheet} from 'react-native';
-
-export function LoginScreen({navigation}){
-    return(
-        <View style={styles.container}>
-            <Text>This is the detail page</Text>
-            <StatusBar style="auto" />
-            <Button title="next page" onPress={()=> null}></Button>
-            <Button title="create Account" onPress={()=>navigation.navigate("CreateAccount")}>
-            </Button>
-        </View>
-    )
-}
+import LoginScreen from "../Login";
 
 export function CreateAccountScreen(){
     return(

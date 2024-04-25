@@ -8,7 +8,7 @@ import Button from '../components/Button';
 import COLORS from '../constants/Color';
 import { useDispatch } from 'react-redux';
 
-const Login = ({ navigation, route }) => {
+const LoginScreen = ({ navigation, route }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordShown, setIsPasswordShown] = useState(false);
@@ -18,7 +18,7 @@ const Login = ({ navigation, route }) => {
   const handleLogin = async () => {
 
     try {
-      const response = await axios.post('http://localhost:8080/auth/authenticate', {
+      const response = await axios.post('https://a8f2-105-66-133-228.ngrok-free.app/auth/authenticate', {
         username: username,
         password: password,
       });
@@ -31,7 +31,7 @@ const Login = ({ navigation, route }) => {
           route.params.handleLogin(response.data.token);
         }
   
-        navigation.navigate('TokenDisplay');
+        navigation.navigate('HomeScreen');
       } 
     } catch (error) {
       console.error('Authentication failed', error);
@@ -124,4 +124,4 @@ const styles = {
   },
 };
 
-export default Login;
+export default LoginScreen;
