@@ -8,7 +8,7 @@ const TokenDisplay = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.tokenText}>Token: </Text>
+      <Text style={styles.tokenText}>Token: {token} </Text>
     </View>
   );
 };

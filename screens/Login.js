@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -6,39 +6,34 @@ import { Ionicons } from '@expo/vector-icons';
 import Checkbox from 'expo-checkbox';
 import Button from '../components/Button';
 import COLORS from '../constants/Color';
-import { useDispatch } from 'react-redux';
-
-const LoginScreen = ({ navigation, route }) => {
+import { AuthContext } from '../Context/AuthContextProvider';
+import { API_BASE_URL } from '../constants/constants';
+const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isPasswordShown, setIsPasswordShown] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
-  const dispatch = useDispatch();
+  const { login } = useContext(AuthContext);
 
   const handleLogin = async () => {
-
     try {
-      const response = await axios.post('https://a8f2-105-66-133-228.ngrok-free.app/auth/authenticate', {
+      const response = await axios.post(`${API_BASE_URL}/auth/authenticate`, {
         username: username,
         password: password,
       });
-  
-      if (response.status === 200) {
-        console.log('Authentication successful', response.data.jwt);
-        dispatch({ type: 'SET_TOKEN', payload: response.data.jwt });
 
-        if (route.params && route.params.handleLogin) {
-          route.params.handleLogin(response.data.token);
-        }
-  
+      if (response.status === 200) {
+        console.log('Authentication successful', response.data);
+        login(response.data.jwt, response.data.user);
         navigation.navigate('HomeScreen');
-      } 
+      }
     } catch (error) {
       console.error('Authentication failed', error);
       Alert.alert('Login Failed', 'Invalid username or password. Please try again.');
     }
   };
-      return (
+
+  return (
     <SafeAreaView style={{ flex: 1, backgroundColor: COLORS.white }}>
       <View style={{ flex: 1, marginHorizontal: 22 }}>
         <View style={{ marginVertical: 22 }}>
@@ -94,7 +89,7 @@ const LoginScreen = ({ navigation, route }) => {
             marginBottom: 30,
           }}>
           <Text>New to the app?</Text>
-          <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
+          <TouchableOpacity onPress={() => navigation.navigate('CreateAccount')}>
             <Text style={{color: '#AD40AF', fontWeight: '700'}}> Register</Text>
           </TouchableOpacity>
         </View>

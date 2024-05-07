@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { StatusBar } from "expo-status-bar";
 import {View, Text, Button, StyleSheet} from 'react-native';
 import LoginScreen from "../Login";
+import HomeScreen from "../HomeScreen";
+import RendezVousScreen from "../RendezVousScreen";
 
 export function CreateAccountScreen(){
     return(
@@ -19,9 +21,10 @@ export function CreateAccountScreen(){
 const AuthStack = createNativeStackNavigator();
 export function AuthScreenStack() {
   return (
-    <AuthStack.Navigator>
+    <AuthStack.Navigator initialRouteName='Login'>
         <AuthStack.Screen name="Login" component={LoginScreen} />
         <AuthStack.Screen name="CreateAccount" component={CreateAccountScreen} />
+
     </AuthStack.Navigator>
   )}
 

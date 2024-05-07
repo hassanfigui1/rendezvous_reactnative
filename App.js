@@ -4,20 +4,19 @@ import { AuthScreenStack } from "./screens/folder/AuthStack";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { Provider } from "react-redux";
-import store from "./store";
 import AuthStack from "./navigation/AuthStack";
 import WelcomeNavigator from "./navigation/WelcomeNavigator";
 import TokenDisplay from "./screens/TokenDisplay";
+import Manager from "./screens/folder/Manager";
+import { PaperProvider } from "react-native-paper";
 const Stack = createStackNavigator();
 export default function App() {
-  const [auth, setAuth] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [auth, setAuth] = useState(true);
+  const [loading, setLoading] = useState(false);
   return (
-    <Provider store={store}>
-      <NavigationContainer>
-        {auth ? <HomeScreenStack /> : <AuthScreenStack />}
-      </NavigationContainer>
-    </Provider>
+    <PaperProvider>
+        <Manager/>
+    </PaperProvider>
   );
 }
 

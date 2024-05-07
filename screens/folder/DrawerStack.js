@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useContext } from "react";
+import { AuthContext } from "../../Context/AuthContextProvider";
 import {
   Button,
   Modal,
@@ -17,7 +18,7 @@ import { ProfileScreen } from "../ProfileScreen";
 import Login from "../Login";
 import RendezVousScreen from "../RendezVousScreen";
 import HomeScreen from "../HomeScreen";
-
+import Table from "../DataTable";
 
 function MyModal({ isVisible, onClick }) {
   return (
@@ -62,10 +63,17 @@ function MyModal({ isVisible, onClick }) {
 // }
 
 function CustomDrawerContent(props) {
+  const { logout, user } = useContext(AuthContext); // Access user information from AuthContext
+
+  const handleLogout = () => {
+    props.navigation.closeDrawer();
+    logout();
+  };
+
   return (
     <>
       <View style={styles.drawerHeader}>
-        <Text>HEADER</Text>
+        <Text>{user ? user.username : ''}</Text>
       </View>
       <DrawerContentScrollView {...props}>
         <View style={{ flex: 1 }}>
@@ -75,10 +83,7 @@ function CustomDrawerContent(props) {
       <View style={{ marginBottom: 30 }}>
         <Button
           title="LOGOUT"
-          onPress={() => {
-            props.navigation.closeDrawer();
-            // do logout code here...
-          }}
+          onPress={handleLogout}
         ></Button>
       </View>
     </>
@@ -94,12 +99,17 @@ export function DrawerScreenStack() {
       <DrawerStack.Screen name="HomeScreen" component={HomeScreen} />
 
       {/* <DrawerStack.Screen name="Home" component={HomeScreen} /> */}
-      <DrawerStack.Screen name="Profile" component={ProfileScreen} />
-      <DrawerStack.Screen name="Login" component={Login} />
+      {/* <DrawerStack.Screen name="Profile" component={ProfileScreen} /> */}
+      {/* <DrawerStack.Screen name="Login" component={Login} /> */}
       <DrawerStack.Screen
         name="RendezVousScreen"
         component={RendezVousScreen}
       />
+      <DrawerStack.Screen
+        name="Table"
+        component={Table}
+      />
+
     </DrawerStack.Navigator>
   );
 }

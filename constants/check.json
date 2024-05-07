@@ -1,0 +1,40 @@
+{
+    "_bodyBlob": {
+        "_data": {
+            "__collector": [Object
+            ],
+            "blobId": "1e248520-aba6-4b7f-8ef4-e981e77d050e",
+            "offset": 0,
+            "size": 0
+        }
+    },
+    "_bodyInit": {
+        "_data": {
+            "__collector": [Object
+            ],
+            "blobId": "1e248520-aba6-4b7f-8ef4-e981e77d050e",
+            "offset": 0,
+            "size": 0
+        }
+    },
+    "bodyUsed": false,
+    "headers": {
+        "map": {
+            "cache-control": "no-cache, no-store, max-age=0, must-revalidate",
+            "content-length": "0",
+            "date": "Sun, 05 May 2024 21:32:57 GMT",
+            "expires": "0",
+            "location": "http://8f6d-105-66-4-83.ngrok-free.app/api/rendezvous/28",
+            "pragma": "no-cache",
+            "vary": "Origin, Access-Control-Request-Method, Access-Control-Request-Headers",
+            "x-content-type-options": "nosniff",
+            "x-frame-options": "DENY",
+            "x-xss-protection": "0"
+        }
+    },
+    "ok": true,
+    "status": 201,
+    "statusText": "",
+    "type": "default",
+    "url": "https://8f6d-105-66-4-83.ngrok-free.app/api/rendezvous"
+}
