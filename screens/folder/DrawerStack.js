@@ -19,6 +19,7 @@ import Login from "../Login";
 import RendezVousScreen from "../RendezVousScreen";
 import HomeScreen from "../HomeScreen";
 import Table from "../DataTable";
+import MesRendezvous from "../MesRendezvousScreen";
 
 function MyModal({ isVisible, onClick }) {
   return (
@@ -96,7 +97,8 @@ export function DrawerScreenStack() {
       initialRouteName="HomeScreen"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
     >
-      <DrawerStack.Screen name="HomeScreen" component={HomeScreen} />
+      <DrawerStack.Screen name="HomeScreen"        options={{ title: 'Les Centres' }}
+ component={HomeScreen} />
 
       {/* <DrawerStack.Screen name="Home" component={HomeScreen} /> */}
       {/* <DrawerStack.Screen name="Profile" component={ProfileScreen} /> */}
@@ -104,10 +106,18 @@ export function DrawerScreenStack() {
       <DrawerStack.Screen
         name="RendezVousScreen"
         component={RendezVousScreen}
+        options={{ title: 'Prendre Rendez-vous' }}
+
       />
       <DrawerStack.Screen
-        name="Table"
+        name="Liste des utilisateurs"
         component={Table}
+      />
+      <DrawerStack.Screen
+        name="Mes Rendezvous"
+        component={MesRendezvous}
+        options={{ title: 'Mes rendez-vous' }}
+
       />
 
     </DrawerStack.Navigator>

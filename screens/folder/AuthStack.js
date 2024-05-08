@@ -5,7 +5,7 @@ import {View, Text, Button, StyleSheet} from 'react-native';
 import LoginScreen from "../Login";
 import HomeScreen from "../HomeScreen";
 import RendezVousScreen from "../RendezVousScreen";
-
+import Signup from "../SignupScreen";
 export function CreateAccountScreen(){
     return(
         <View styles={styles.container}>
@@ -23,7 +23,7 @@ export function AuthScreenStack() {
   return (
     <AuthStack.Navigator initialRouteName='Login'>
         <AuthStack.Screen name="Login" component={LoginScreen} />
-        <AuthStack.Screen name="CreateAccount" component={CreateAccountScreen} />
+        <AuthStack.Screen name="CreateAccount" component={Signup} />
 
     </AuthStack.Navigator>
   )}

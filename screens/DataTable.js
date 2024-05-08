@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useContext, useCallback } from 'react';
+import { View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { DataTable } from 'react-native-paper';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { AuthContext } from '../Context/AuthContextProvider';
 import { API_BASE_URL } from '../constants/constants';
 
@@ -9,36 +10,45 @@ const UsersTable = () => {
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(6); // Default items per page
+  const [itemsPerPage, setItemsPerPage] = useState(6);
   const [numberOfItemsPerPageList] = useState([6, 8, 10]);
+  const isFocused = useIsFocused();
+  const navigation = useNavigation();
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API_BASE_URL}/api/users`, {
+        headers: {
+          Authorization: `Bearer ${userToken}`,
+        },
+      });
+      const data = await response.json();
+      setUsers(data._embedded.users);
+      setLoading(false);
+    } catch (error) {
+      console.log('Error fetching users:', error);
+      setLoading(false);
+    }
+  }, [userToken]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/users`, {
-          headers: {
-            Authorization: `Bearer ${userToken}`,
-          },
-        });
-        const data = await response.json();
-        setUsers(data._embedded.users);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
-  }, [userToken]);
+    if (isFocused) {
+      fetchUsers();
+    }
+  }, [isFocused, fetchUsers]);
 
   const handleItemsPerPageChange = (value) => {
     setItemsPerPage(value);
-    setPage(0); // Reset to first page when items per page changes
+    setPage(0);
   };
 
   const from = page * itemsPerPage;
   const to = Math.min((page + 1) * itemsPerPage, users.length);
+
+  const navigateToUserDetail = (user) => {
+    navigation.navigate('UserDetailScreen', { user });
+  };
 
   if (loading) {
     return (
@@ -55,19 +65,19 @@ const UsersTable = () => {
           <DataTable.Title>Username</DataTable.Title>
           <DataTable.Title>Name</DataTable.Title>
           <DataTable.Title>Role</DataTable.Title>
-          <DataTable.Title>enabled</DataTable.Title>
+          <DataTable.Title>Enabled</DataTable.Title>
           <DataTable.Title>Edit</DataTable.Title>
-
         </DataTable.Header>
         {users.slice(from, to).map((user) => (
-          <DataTable.Row key={user.username}>
-            <DataTable.Cell>{user.username}</DataTable.Cell>
-            <DataTable.Cell>{user.name}</DataTable.Cell>
-            <DataTable.Cell>{user.role}</DataTable.Cell>
-            <DataTable.Cell>{user.accountNonExpired}</DataTable.Cell>
-            <DataTable.Cell>{user.name}</DataTable.Cell>
-
-          </DataTable.Row>
+          <TouchableOpacity key={user.username} onPress={() => navigateToUserDetail(user,{ user })}>
+            <DataTable.Row>
+              <DataTable.Cell>{user.username}</DataTable.Cell>
+              <DataTable.Cell>{user.name}</DataTable.Cell>
+              <DataTable.Cell>{user.role}</DataTable.Cell>
+              <DataTable.Cell>{user.accountNonExpired}</DataTable.Cell>
+              <DataTable.Cell>Edit</DataTable.Cell>
+            </DataTable.Row>
+          </TouchableOpacity>
         ))}
       </DataTable>
       <DataTable.Pagination

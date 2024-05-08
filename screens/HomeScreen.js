@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
   View,
-  Text,
   FlatList,
   TouchableOpacity,
-  Button,
   StyleSheet,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AuthContext } from "../Context/AuthContextProvider";
 import { API_BASE_URL } from "../constants/constants";
+import { Avatar, Card, Text } from 'react-native-paper';
+
 const HomeScreen = () => {
   const navigation = useNavigation();
   const { userToken } = useContext(AuthContext);
   const [centres, setCentres] = useState([]);
+  const numColumns = 2; // You can change this to 2 if you prefer two columns instead
 
   useEffect(() => {
     const fetchCentres = async () => {
@@ -31,14 +32,14 @@ const HomeScreen = () => {
         if (response.ok) {
           setCentres(data._embedded.centres);
         } else {
-          console.error("Error fetching centre data:", data);
+          console.log("Error fetching centre data:", data);
         }
       } catch (error) {
-        console.error("Error fetching centre data:", error);
+        console.log("Error fetching centre data:", error);
       }
     };
     fetchCentres();
-  }, [userToken]); 
+  }, [userToken]);
 
   const handleCentrePress = (centreId) => {
     navigation.navigate("RendezVousScreen", { selectedCentreId: centreId });
@@ -49,40 +50,42 @@ const HomeScreen = () => {
     navigation.navigate("Login");
   };
 
+  const LeftContent = props => <Avatar.Icon {...props}/>
+
   return (
-    <View style={{ flex: 1, justifyContent: "center" }}>
+    <View style={{ flex: 1 }}>
       <FlatList
         data={centres}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleCentrePress(item.resourceId)}>
-            <View style={styles.item}>
-              <Text>{item.nom}</Text>
-              <Text>{item.adresse}</Text>
-            </View>
+          <TouchableOpacity onPress={() => handleCentrePress(item.resourceId)} style={styles.cardContainer}>
+            <Card style={styles.card}>
+              <Card.Title
+                title={item.nom}
+                subtitle={item.adresse}
+              />
+            </Card>
           </TouchableOpacity>
         )}
+        numColumns={numColumns}
         contentContainerStyle={styles.flatListContainer}
       />
-      {/* <Button title="Log Out" onPress={handleLogout} /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   flatListContainer: {
-    width: "100%", 
-    paddingHorizontal: 30, 
+    paddingHorizontal: 10,
+    paddingVertical: 10,
   },
-  item: {
-    marginBottom: 10,
-    fontSize: 16,
-    backgroundColor: "#ABEBC6",
-    height: 56,
-    alignContent: "center",
-    paddingLeft: 18,
-    fontSize: 18,
-    borderRadius: 14,
+  cardContainer: {
+    flex: 1 / 2, // Adjust the flex divisor to change column count (1 / numColumns)
+    padding: 5,
+  },
+  card: {
+    flex: 1,
+    borderRadius: 10,
   },
 });
 

@@ -5,7 +5,7 @@ import { DrawerScreenStack } from "./DrawerStack";
 import { StatusBar } from "expo-status-bar";
 import HomeScreen from "../HomeScreen";
 import RendezVousScreen from "../RendezVousScreen";
-
+import UserDetailScreen from "../admin/UserDetailScreen";
 const HomeStack = createNativeStackNavigator();
 export function HomeScreenStack() {
   return (
@@ -15,6 +15,7 @@ export function HomeScreenStack() {
         component={DrawerScreenStack}
         options={{ headerShown: false }}
       />
+      <HomeStack.Screen name="UserDetailScreen" component={UserDetailScreen} />
       {/* <HomeStack.Screen name="HomeScreen" component={HomeScreen} /> */}
     </HomeStack.Navigator>
   );
